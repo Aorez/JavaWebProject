@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章记录系统</title>
+</head>
+<body>
+
+<div id="app">
+
+
+    <el-row>
+        <el-col :span="12">
+            <h2>{{article.title}}</h2>
+            <div v-for="i in article.paras.length">
+                <p>{{article.paras[i - 1]}}</p>
+            </div>
+        </el-col>
+
+
+        <el-col :span="12">
+            <el-button type="primary" @click="addArt()">添加文档</el-button>
+            <el-button type="danger" @click="delArt()">删除文档</el-button>
+            <el-button type="success" @click="saveArticle()">保存文档</el-button>
+            <br>
+            <br>
+            <el-button type="primary" @click="addInput(article.paras.length)">添加段落</el-button>
+            <el-button type="danger" @click="delNull()">清除空段落</el-button>
+            <br>
+            <br>
+            <el-input type="text" placeholder="标题" maxlength="20" show-word-limit v-model="article.title"
+                      @keydown.enter.native="addInput(0)"></el-input>
+
+
+            <div v-for="i in article.paras.length">
+                <br>
+                <el-row :gutter="10">
+                    <el-col :span="18">
+                        <el-input type="textarea" :autosize="{minRows:2}" placeholder="新段落" maxlength="300"
+                                  show-word-limit
+                                  v-model="article.paras[i - 1]" @keydown.enter.native="addInput(i)"></el-input>
+                    </el-col>
+                    <el-col :span="2.5">
+                        <el-button type="primary" icon="el-icon-plus" @click="addInput(i)"></el-button>
+                    </el-col>
+                    <el-col :span="1">
+                        <el-button type="danger" icon="el-icon-delete" @click="delInput(i - 1)"></el-button>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-col>
+
+
+    </el-row>
+
+    <el-row>
+
+        <el-pagination
+                background
+                layout="total, prev, pager, next, jumper"
+                :total="articleCount"
+                :page-size=1
+                :current-page="curPage"
+                @current-change="changePage"
+        >
+        </el-pagination>
+    </el-row>
+
+
+</div>
+
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+
+<script>
+    new Vue({
+        el: "#app",
+        mounted() {
+            this.article.id = 0;
+            this.findArticle();
+            this.getCount();
+        },
+        data: {
+            articleCount: 0,
+            curPage:1,
+            article: {
+                id: '',
+                title: '',
+                paras: [],
+            },
+        },
+        methods: {
+            addInput(index) {
+                //在当前段落后插入
+                this.article.paras.splice(index, 0, '');
+
+                const e = window.event || arguments[0];
+                if (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13) {
+                    e.returnValue = false;
+                    return false;
+                }
+            },
+            delInput(index) {
+                //删除某个下标的段落
+                this.article.paras.splice(index, 1);
+            },
+            delNull() {
+                for (let i = 0; i < this.article.paras.length;) {
+                    if (this.isNull(i)) {
+                        this.delInput(i);
+                    } else {
+                        i++;
+                    }
+                }
+            },
+            isNull(index) {
+                return this.article.paras[index] === undefined || this.article.paras[index] === '';
+            },
+            findArticle() {
+                let _this = this;
+                axios({
+                    method: "post",
+                    url: "/stu-info-manage-sys/article/findArticle",
+                    data: "id=" + this.curPage.toString(),
+                }).then(function (resp) {
+                    if (resp.data === undefined || resp.data === null || resp.data === '') {
+                        _this.article.id = -1;
+                        _this.article.title = '';
+                        _this.article.paras = [];
+                    }
+                    else {
+                        _this.article = resp.data;
+                    }
+                })
+            },
+            saveArticle() {
+                let _this = this;
+                axios({
+                    method: "post",
+                    url: "/stu-info-manage-sys/article/cover",
+                    data: this.article,
+                }).then(function (resp) {
+                    _this.getCount();
+                    _this.findArticle();
+                    if (resp.data === "success") {
+                        _this.$message({
+                            message: "保存成功",
+                            type: 'success'
+                        });
+                    } else {
+                        _this.$message({
+                            message: "保存失败",
+                            type: 'warning'
+                        });
+                    }
+                })
+            },
+            getCount() {
+                let _this = this;
+                axios({
+                    method: "post",
+                    url: "/stu-info-manage-sys/article/count",
+                }).then(function (resp) {
+                    _this.articleCount = Number(resp.data) + 1;
+                });
+            },
+            changePage(index) {
+                this.curPage = index;
+                this.findArticle();
+            },
+            addArt() {
+                this.changePage(this.articleCount);
+            },
+            delArt() {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+
+                    let _this = this;
+                    axios({
+                        method: "post",
+                        url: "/stu-info-manage-sys/article/remove",
+                        data: "id=" + this.article.id.toString(),
+                    }).then(function (resp) {
+                        _this.findArticle();
+                        _this.getCount();
+                        if (resp.data === "success") {
+                            _this.$message({
+                                message: "删除成功",
+                                type: 'success'
+                            });
+                        } else {
+                            _this.$message({
+                                message: "删除失败",
+                                type: 'warning'
+                            });
+                        }
+
+                    });
+                }).catch(() => {
+
+                });
+            },
+        },
+    })
+
+</script>
+
+</body>
+</html>

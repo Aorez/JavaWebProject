@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生成绩分析</title>
+
+
+    <style>
+        .el-table .warning-row {
+            /*background: oldlace;*/
+            background: red;
+        }
+
+        .el-table .success-row {
+            /*background: #f0f9eb;*/
+            background: #13ce66;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+
+    <el-row>
+
+        <!--        筛选栏-->
+        <el-row>
+            <el-form :inline="true" :model="cls" class="demo-form-inline">
+                <el-form-item label="年级">
+                    <el-select v-model="gradei" placeholder="年级" style="width: 150px">
+                        <el-option label="初一" :value="0"></el-option>
+                        <el-option label="初二" :value="1"></el-option>
+                        <el-option label="初三" :value="2"></el-option>
+                        <el-option label="高一" :value="3"></el-option>
+                        <el-option label="高二" :value="4"></el-option>
+                        <el-option label="高三" :value="5"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="学段">
+                    <el-select v-model="seci" placeholder="学段" style="width: 150px">
+                        <el-option label="1" :value="0"></el-option>
+                        <el-option label="2" :value="1"></el-option>
+                        <el-option label="2.5" :value="2"></el-option>
+                        <el-option label="3" :value="3"></el-option>
+                        <el-option label="4" :value="4"></el-option>
+                        <el-option label="4.5" :value="5"></el-option>
+                        <el-option label="5" :value="6"></el-option>
+                        <el-option label="6" :value="7"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="analyse()">分析</el-button>
+                    <el-button type="success" @click="goon()">下一个</el-button>
+                </el-form-item>
+            </el-form>
+
+        </el-row>
+
+        <!--            成绩表格-->
+        <el-row>
+            <el-table
+                    :data="clses"
+                    border
+                    style="width: 100%"
+                    :row-class-name="tableRowClassName">
+                <el-table-column
+                        prop="course"
+                        label="课程" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="cls"
+                        label="班级" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="num"
+                        label="人数" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[0]"
+                        label="100" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[1]"
+                        label="90-99" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[2]"
+                        label="80-89" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[3]"
+                        label="70-79" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[4]"
+                        label="60-69" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[5]"
+                        label="50-59" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[6]"
+                        label="40-49" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="count[7]"
+                        label="39以下" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="avg"
+                        label="平均分" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="pass"
+                        label="及格率%" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="exc"
+                        label="优秀率%" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="max"
+                        label="最高分" align="center">
+                </el-table-column>
+                <el-table-column
+                        prop="min"
+                        label="最低分" align="center">
+                </el-table-column>
+            </el-table>
+        </el-row>
+
+
+        <!--        分页查询-->
+<!--        <el-row>-->
+<!--            <el-pagination-->
+<!--                    @size-change="pageSizeChange"-->
+<!--                    @current-change="currentPageChange"-->
+<!--                    :current-page="currentPage"-->
+<!--                    :page-sizes="[5, 10, 15, 20]"-->
+<!--                    :page-size="pageSize"-->
+<!--                    layout="total, sizes, prev, pager, next, jumper"-->
+<!--                    :total="totalCount" v-show="tableShow[1]">-->
+<!--            </el-pagination>-->
+<!--        </el-row>-->
+
+    </el-row>
+
+</div>
+
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+
+<script>
+    new Vue({
+        el: '#app',
+        mounted() {
+            clearInterval(this.timer);
+            this.timer = setInterval(() => {
+                this.goon();
+            }, 3000);
+        },
+        destroyed() {
+            clearInterval(this.timer);
+        },
+        data: {
+            cls:{
+                grade:'',
+                sec:'',
+                course:'',
+
+                cls:'',
+                num:'',
+                count:[],
+                avg:'',
+                pass:'',
+                exc:'',
+                max:'',
+                min:'',
+            },
+            clses:'',
+            grades:['初一','初二','初三','高一','高二','高三'],
+            gradei:0,
+            seci:-1,
+            secs:['1','2','2.5','3','4','4.5','5','6'],
+        },
+        methods: {
+            tableRowClassName({row, rowIndex}) {
+                if (row.pass < 80) {
+                    return 'warning-row';
+                }
+                else if (row.exc > 80) {
+                    return 'success-row';
+                }
+                // if (rowIndex === 1) {
+                //     return 'warning-row';
+                // }
+                // else if (rowIndex === 3) {
+                //     return 'success-row';
+                // }
+                return '';
+            },
+            analyse() {
+                let _this = this;
+                // let anaData = "grade="+this.grade+"&sec="+this.sec;
+                axios({
+                    method: "post",
+                    url: "/Macao-stu-score/cls/analyse",
+                    data:this.cls
+                }).then(function (resp) {
+                    _this.clses = resp.data;
+                })
+            },
+            goon() {
+                this.seci++;
+                if (this.seci === this.secs.length) {
+                    this.seci = 0;
+                    this.gradei++;
+                    if (this.gradei === this.grades.length) {
+                        this.gradei = 0;
+                    }
+                }
+                this.cls.grade = this.grades[this.gradei];
+                this.cls.sec = this.secs[this.seci];
+                this.analyse();
+            },
+        },
+    })
+</script>
+
+</body>
+</html>

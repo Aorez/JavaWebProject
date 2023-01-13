@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <style>
+        .el-header, .el-footer {
+            /*background-color: #B3C0D1;*/
+            background-color: #D3DCE6;
+            /*color: #333;*/
+            color: red;
+            /*background-color: transparent;*/
+            /*color: transparent;*/
+            text-align: center;
+            line-height: 60px;
+        }
+
+        .el-aside {
+            background-color: #D3DCE6;
+            /*background-color: #B3C0D1;*/
+            /*color: #333;*/
+            /*background-color: transparent;*/
+            color: transparent;
+            text-align: center;
+            line-height: 500px;
+        }
+
+        .el-main {
+            /*background-color: #E9EEF3;*/
+            background-color: #D3DCE6;
+            /*background-color: #B3C0D1;*/
+            color: #333;
+            text-align: center;
+            /*line-height: 160px;*/
+            line-height: 500px;
+        }
+
+        body > .el-container {
+            margin-bottom: 40px;
+        }
+
+        .el-container:nth-child(5) .el-aside,
+        .el-container:nth-child(6) .el-aside {
+            /*line-height: 260px;*/
+            line-height: 20px;
+        }
+
+        .el-container:nth-child(7) .el-aside {
+            /*line-height: 320px;*/
+            line-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div id="app">
+
+    <el-container>
+        <el-header height="200px"></el-header>
+        <el-container>
+            <el-aside width="500px">Aside</el-aside>
+            <el-main>
+
+                <el-header height="30px">
+                    {{loginMsg}}
+                </el-header>
+                <el-main>
+                    <el-form ref="form" :model="loginForm" label-width="80px">
+                        <el-form-item label="用户名">
+                            <el-input v-model="loginForm.username"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码">
+                            <el-input v-model="loginForm.password" show-password></el-input>
+                        </el-form-item>
+
+                        <el-form-item>
+                            <el-button type="primary" @click="login()">登录</el-button>
+                            <el-button @click="adminLogin()">用户管理</el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-main>
+
+
+            </el-main>
+            <el-aside width="550px">Aside</el-aside>
+        </el-container>
+
+<!--        <el-footer>Footer</el-footer>-->
+    </el-container>
+
+
+</div>
+
+
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            loginForm:{
+                username:'',
+                password:'',
+            },
+            loginMsg:'',
+        },
+        methods:{
+            //登录
+            login(){
+                let _this = this;
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/user/login",
+                    url:"/stu-info-manage-sys/user/login",
+                    data:this.loginForm,
+                }).then(function (response) {
+                    if (response.data == "fail") {
+                        _this.loginMsg = "密码错误";
+                    }
+                    else if (response.data == "admin") {
+                        // location.href = "http://localhost:8080/stu-info-manage-sys/users.html";
+                        location.href = "/stu-info-manage-sys/users.html";
+                    }
+                    else {
+                        // location.href = "http://localhost:8080/stu-info-manage-sys/home.html?username="+_this.loginForm.username;
+                        location.href = "/stu-info-manage-sys/home.html?username="+_this.loginForm.username;
+                    }
+                })
+            },
+            //管理员登录
+            adminLogin(){
+                this.login();
+            }
+        }
+    })
+</script>
+</body>
+</html>

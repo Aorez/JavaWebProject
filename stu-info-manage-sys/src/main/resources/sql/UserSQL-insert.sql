@@ -1,0 +1,1 @@
+insert into tb_user values (null, 'username', 'password');

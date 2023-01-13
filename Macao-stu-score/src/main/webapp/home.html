@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>早上好</title>
+</head>
+<body>
+
+
+<div id="app">
+
+    <el-row class="tac">
+        <el-col :span="4">
+            <h3>学生信息管理系统</h3>
+            <el-menu
+                    default-active="1"
+                    class="el-menu-vertical-demo">
+                <el-menu-item index="1" @click="menuSelect(1)">
+                    <i class="el-icon-magic-stick"></i>
+                    <span slot="title">学生信息</span>
+                </el-menu-item>
+                <el-menu-item index="2" @click="menuSelect(2)">
+                    <i class="el-icon-menu"></i>
+                    <span slot="title">教师信息</span>
+                </el-menu-item>
+                <el-menu-item index="3" @click="menuSelect(3)">
+                    <i class="el-icon-medal"></i>
+                    <span slot="title">班级信息</span>
+                </el-menu-item>
+                <el-menu-item index="4" @click="menuSelect(4)">
+                    <i class="el-icon-message-solid"></i>
+                    <span slot="title">课程信息</span>
+                </el-menu-item>
+                <el-menu-item index="5" @click="menuSelect(5)">
+                    <i class="el-icon-s-flag"></i>
+                    <span slot="title">成绩信息</span>
+                </el-menu-item>
+            </el-menu>
+        </el-col>
+
+
+
+
+<!--        学生信息部分-->
+        <el-col :span="20" v-show="tableShow[1]">
+<!--            筛选栏-->
+            <el-row>
+                <el-form :inline="true" :model="student" class="demo-form-inline">
+                    <el-form-item label="年级">
+                        <el-select v-model="student.grade" placeholder="年级" style="width: 100px">
+                            <el-option label="" value=""></el-option>
+                            <el-option label="初一" value="初一"></el-option>
+                            <el-option label="初二" value="初二"></el-option>
+                            <el-option label="初三" value="初三"></el-option>
+                            <el-option label="高一" value="高一"></el-option>
+                            <el-option label="高二" value="高二"></el-option>
+                            <el-option label="高三" value="高三"></el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="班级">
+                        <el-input v-model="student.classId" placeholder="班级" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学号">
+                        <el-input v-model="student.sno" placeholder="学号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名">
+                        <el-input v-model="student.name" placeholder="姓名" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性别">
+                        <el-select v-model="student.sex" placeholder="性别" style="width: 100px">
+                            <el-option label="" value=""></el-option>
+                            <el-option label="男" value="男"></el-option>
+                            <el-option label="女" value="女"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="年龄">
+                        <el-input v-model="student.age" placeholder="年龄" style="width: 100px"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="selectByConditionAndPage(1)">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-row>
+
+
+<!--            新增学生按钮-->
+            <el-row>
+<!--                <el-button type="primary" plain @click="studentAddDialogShow=true">新增</el-button>-->
+                <el-button type="primary" plain @click="studentInsert()">新增</el-button>
+            </el-row>
+            <br>
+<!--            新增学生对话框-->
+            <el-dialog
+                    title="新增"
+                    :visible.sync="studentAddDialogShow"
+                    width="30%"
+            >
+                <el-form ref="form" :model="student" label-width="80px">
+                    <el-form-item label="年级">
+                        <el-input v-model="student.grade"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班级">
+                        <el-input v-model="student.classId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学号">
+                        <el-input v-model="student.sno"></el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名">
+                        <el-input v-model="student.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="性别">
+                        <el-input v-model="student.sex"></el-input>
+                    </el-form-item>
+                    <el-form-item label="年龄">
+                        <el-input v-model="student.age"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+<!--                        <el-button type="primary" @click="studentInsert()">提交</el-button>-->
+                        <el-button type="primary" @click="studentSubmit(studentSubmitType)">提交</el-button>
+                        <el-button @click="studentAddDialogShow = false">取消</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-dialog>
+<!--            学生信息的表格-->
+            <el-row>
+                <el-table
+                        :data="studentData"
+                        border
+                        style="width: 100%">
+                    <el-table-column
+                            prop="grade"
+                            label="年级" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="classId"
+                            label="班级" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="sno"
+                            label="学号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="姓名" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="sex"
+                            label="性别" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="age"
+                            label="年龄" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            align="center"
+                            label="操作">
+                        <el-row slot-scope="studentOperation">
+                            <el-button type="primary" @click="studentUpdateBySno(studentOperation.$index)">修改</el-button>
+                            <el-button type="danger" @click="studentDeleteBySno(studentOperation.$index)">删除</el-button>
+                        </el-row>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+
+
+            <!--        分页查询-->
+            <el-row>
+                <el-pagination
+                        @size-change="pageSizeChange"
+                        @current-change="currentPageChange"
+                        :current-page="currentPage"
+                        :page-sizes="[5, 10, 15, 20]"
+                        :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="totalCount" v-show="tableShow[1]">
+                </el-pagination>
+            </el-row>
+        </el-col>
+
+
+<!--            教师信息-->
+            <el-col :span="20" v-show="tableShow[2]">
+                <!--            筛选栏-->
+                <el-row>
+                    <el-form :inline="true" :model="teacher" class="demo-form-inline">
+                        <el-form-item label="年级">
+                            <el-select v-model="teacher.grade" placeholder="年级" style="width: 100px">
+                                <el-option label="" value=""></el-option>
+                                <el-option label="初一" value="初一"></el-option>
+                                <el-option label="初二" value="初二"></el-option>
+                                <el-option label="初三" value="初三"></el-option>
+                                <el-option label="高一" value="高一"></el-option>
+                                <el-option label="高二" value="高二"></el-option>
+                                <el-option label="高三" value="高三"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="教师编号">
+                            <el-input v-model="teacher.teacherId" placeholder="教师编号" style="width: 150px"></el-input>
+                        </el-form-item>
+                        <el-form-item label="姓名">
+                            <el-input v-model="teacher.name" placeholder="姓名" style="width: 150px"></el-input>
+                        </el-form-item>
+                        <el-form-item label="性别">
+                            <el-select v-model="teacher.sex" placeholder="性别" style="width: 100px">
+                                <el-option label="" value=""></el-option>
+                                <el-option label="男" value="男"></el-option>
+                                <el-option label="女" value="女"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="年龄">
+                            <el-input v-model="teacher.age" placeholder="年龄" style="width: 100px"></el-input>
+                        </el-form-item>
+                        <el-form-item label="课程名称">
+                            <el-input v-model="teacher.courseName" placeholder="课程名称" style="width: 150px"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="selectByConditionAndPage(2)">查询</el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-row>
+                <el-row>
+                    <el-button type="primary" plain @click="teacherInsert()">新增</el-button>
+                </el-row>
+                <br>
+                <!--            教师对话框-->
+                <el-dialog
+                        title="新增"
+                        :visible.sync="teacherInputDialogShow"
+                        width="30%">
+                    <el-form ref="form" :model="teacher" label-width="80px">
+                        <el-form-item label="年级">
+                            <el-input v-model="teacher.grade"></el-input>
+                        </el-form-item>
+                        <el-form-item label="教师编号">
+                            <el-input v-model="teacher.teacherId"></el-input>
+                        </el-form-item>
+                        <el-form-item label="姓名">
+                            <el-input v-model="teacher.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="性别">
+                            <el-input v-model="teacher.sex"></el-input>
+                        </el-form-item>
+                        <el-form-item label="年龄">
+                            <el-input v-model="teacher.age"></el-input>
+                        </el-form-item>
+                        <el-form-item label="课程名称">
+                            <el-input v-model="teacher.courseName"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="teacherSubmit()">提交</el-button>
+                            <el-button @click="teacherInputDialogShow = false">取消</el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-dialog>
+                <el-row>
+                    <!--            教师信息表格-->
+                    <el-table
+                            :data="teacherData"
+                            border
+                            style="width: 100%">
+                        <el-table-column
+                                prop="grade"
+                                label="年级" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="teacherId"
+                                label="教师编号" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="姓名" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="sex"
+                                label="性别" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="age"
+                                label="年龄" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="courseName"
+                                label="课程名称" align="center">
+                        </el-table-column>
+                        <el-table-column
+                                align="center"
+                                label="操作">
+                            <el-row slot-scope="teacherOperation">
+                                <el-button type="primary" @click="teacherUpdateByTeacherId(teacherOperation.$index)">修改</el-button>
+                                <el-button type="danger" @click="teacherDeleteByTeacherId(teacherOperation.$index)">删除</el-button>
+                            </el-row>
+                        </el-table-column>
+                    </el-table>
+                </el-row>
+                <!--        分页查询-->
+                <el-row>
+                    <el-pagination
+                            @size-change="pageSizeChange"
+                            @current-change="currentPageChange"
+                            :current-page="currentPage"
+                            :page-sizes="[5, 10, 15, 20]"
+                            :page-size="pageSize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="totalCount" v-show="tableShow[2]">
+                    </el-pagination>
+                </el-row>
+            </el-col>
+
+
+
+
+        <!--            班级信息-->
+        <el-col :span="20" v-show="tableShow[3]">
+            <!--            筛选栏-->
+            <el-row>
+                <el-form :inline="true" :model="cls" class="demo-form-inline">
+                    <el-form-item label="年级">
+                        <el-select v-model="cls.grade" placeholder="年级" style="width: 100px">
+                            <el-option label="" value=""></el-option>
+                            <el-option label="初一" value="初一"></el-option>
+                            <el-option label="初二" value="初二"></el-option>
+                            <el-option label="初三" value="初三"></el-option>
+                            <el-option label="高一" value="高一"></el-option>
+                            <el-option label="高二" value="高二"></el-option>
+                            <el-option label="高三" value="高三"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="班级号">
+                        <el-input v-model="cls.classId" placeholder="班级号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教室">
+                        <el-input v-model="cls.classroomId" placeholder="教室" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班主任">
+                        <el-input v-model="cls.headmasterName" placeholder="班主任" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班主任编号">
+                        <el-input v-model="cls.headmasterId" placeholder="班主任编号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="selectByConditionAndPage(3)">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-row>
+            <el-row>
+                <el-button type="primary" plain @click="classInsert()">新增</el-button>
+            </el-row>
+            <br>
+            <!--            班级对话框-->
+            <el-dialog
+                    title="新增"
+                    :visible.sync="classInputDialogShow"
+                    width="30%">
+                <el-form ref="form" :model="cls" label-width="85px">
+                    <el-form-item label="年级">
+                        <el-input v-model="cls.grade"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班级号">
+                        <el-input v-model="cls.classId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教室">
+                        <el-input v-model="cls.classroomId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="班主任编号">
+                        <el-input v-model="cls.headmasterId"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="classSubmit()">提交</el-button>
+                        <el-button @click="classInputDialogShow = false">取消</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-dialog>
+            <el-row>
+                <!--            班级信息表格-->
+                <el-table
+                        :data="classData"
+                        border
+                        style="width: 100%">
+                    <el-table-column
+                            prop="grade"
+                            label="年级" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="classId"
+                            label="班级号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="classroomId"
+                            label="教室" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="headmasterName"
+                            label="班主任" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="headmasterId"
+                            label="班主任编号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="studentNum"
+                            label="学生数量" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            align="center"
+                            label="操作">
+                        <el-row slot-scope="classOperation">
+                            <el-button type="primary" @click="classUpdateByClassId(classOperation.$index)">修改</el-button>
+                            <el-button type="danger" @click="classDeleteByClassId(classOperation.$index)">删除</el-button>
+                        </el-row>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <!--        分页查询-->
+            <el-row>
+                <el-pagination
+                        @size-change="pageSizeChange"
+                        @current-change="currentPageChange"
+                        :current-page="currentPage"
+                        :page-sizes="[5, 10, 15, 20]"
+                        :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="totalCount" v-show="tableShow[3]">
+                </el-pagination>
+            </el-row>
+        </el-col>
+
+
+
+
+
+        <!--            课程信息-->
+        <el-col :span="20" v-show="tableShow[4]">
+            <!--            筛选栏-->
+            <el-row>
+                <el-form :inline="true" :model="course" class="demo-form-inline">
+                    <el-form-item label="年级">
+                        <el-select v-model="course.grade" placeholder="年级" style="width: 100px">
+                            <el-option label="" value=""></el-option>
+                            <el-option label="初一" value="初一"></el-option>
+                            <el-option label="初二" value="初二"></el-option>
+                            <el-option label="初三" value="初三"></el-option>
+                            <el-option label="高一" value="高一"></el-option>
+                            <el-option label="高二" value="高二"></el-option>
+                            <el-option label="高三" value="高三"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="课程名称">
+                        <el-input v-model="course.courseName" placeholder="课程名称" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师编号">
+                        <el-input v-model="course.teacherId" placeholder="教师编号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师姓名">
+                        <el-input v-model="course.teacherName" placeholder="教师姓名" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="selectByConditionAndPage(4)">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-row>
+            <el-row>
+                <el-button type="primary" plain @click="courseInsert()">新增</el-button>
+            </el-row>
+            <br>
+            <!--            课程对话框-->
+            <el-dialog
+                    title="新增"
+                    :visible.sync="courseInputDialogShow"
+                    width="30%">
+                <el-form ref="form" :model="course" label-width="85px">
+                    <el-form-item label="年级">
+                        <el-input v-model="course.grade"></el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名称">
+                        <el-input v-model="course.courseName"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="courseSubmit()">提交</el-button>
+                        <el-button @click="courseInputDialogShow = false">取消</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-dialog>
+            <el-row>
+                <!--            课程信息表格-->
+                <el-table
+                        :data="courseData"
+                        border
+                        style="width: 100%">
+                    <el-table-column
+                            prop="grade"
+                            label="年级" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="courseName"
+                            label="课程名称" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="teacherId"
+                            label="教师编号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="teacherName"
+                            label="教师姓名" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            align="center"
+                            label="操作">
+                        <el-row slot-scope="courseOperation">
+                            <el-button type="primary" @click="courseUpdateByCourseId(courseOperation.$index)">修改</el-button>
+                            <el-button type="danger" @click="courseDeleteByCourseId(courseOperation.$index)">删除</el-button>
+                        </el-row>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <!--        分页查询-->
+            <el-row>
+                <el-pagination
+                        @size-change="pageSizeChange"
+                        @current-change="currentPageChange"
+                        :current-page="currentPage"
+                        :page-sizes="[5, 10, 15, 20]"
+                        :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="totalCount" v-show="tableShow[4]">
+                </el-pagination>
+            </el-row>
+        </el-col>
+
+
+
+
+        <!--            成绩信息-->
+        <el-col :span="20" v-show="tableShow[5]">
+            <!--            筛选栏-->
+            <el-row>
+                <el-form :inline="true" :model="score" class="demo-form-inline">
+                    <el-form-item label="学号">
+                        <el-input v-model="score.sno" placeholder="学号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="学生姓名">
+                        <el-input v-model="score.studentName" placeholder="学生姓名" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名称">
+                        <el-input v-model="score.courseName" placeholder="课程名称" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师编号">
+                        <el-input v-model="score.teacherId" placeholder="教师编号" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师姓名">
+                        <el-input v-model="score.teacherName" placeholder="教师姓名" style="width: 150px"></el-input>
+                    </el-form-item>
+                    <el-form-item label="排序">
+                        <el-select v-model="scoreOrdered" placeholder="排序" style="width: 150px">
+                            <el-option label="" value=""></el-option>
+                            <el-option label="升序" value="up"></el-option>
+                            <el-option label="降序" value="down"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="selectByConditionAndPage(5)">查询</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-row>
+            <el-row>
+                <el-button type="primary" plain @click="scoreInsert()">新增</el-button>
+            </el-row>
+            <br>
+            <!--            成绩对话框-->
+            <el-dialog
+                    title="新增"
+                    :visible.sync="scoreInputDialogShow"
+                    width="30%">
+                <el-form ref="form" :model="score" label-width="85px">
+                    <el-form-item label="学号">
+                        <el-input v-model="score.sno"></el-input>
+                    </el-form-item>
+                    <el-form-item label="课程名称">
+                        <el-input v-model="score.courseName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="教师编号">
+                        <el-input v-model="score.teacherId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="成绩">
+                        <el-input v-model="score.score"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="scoreSubmit()">提交</el-button>
+                        <el-button @click="scoreInputDialogShow = false">取消</el-button>
+                    </el-form-item>
+                </el-form>
+            </el-dialog>
+            <el-row>
+                <!--            成绩信息表格-->
+                <el-table
+                        :data="scoreData"
+                        border
+                        style="width: 100%">
+                    <el-table-column
+                            prop="sno"
+                            label="学号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="studentName"
+                            label="学生姓名" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="courseName"
+                            label="课程名称" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="teacherId"
+                            label="教师编号" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="teacherName"
+                            label="教师姓名" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="score"
+                            label="成绩" align="center">
+                    </el-table-column>
+                    <el-table-column
+                            align="center"
+                            label="操作">
+                        <el-row slot-scope="scoreOperation">
+                            <el-button type="primary" @click="scoreUpdateBySnoAndCourseId(scoreOperation.$index)">修改</el-button>
+                            <el-button type="danger" @click="scoreDeleteBySnoAndCourseId(scoreOperation.$index)">删除</el-button>
+                        </el-row>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <!--        分页查询-->
+            <el-row>
+                <el-pagination
+                        @size-change="pageSizeChange"
+                        @current-change="currentPageChange"
+                        :current-page="currentPage"
+                        :page-sizes="[5, 10, 15, 20]"
+                        :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="totalCount" v-show="tableShow[5]">
+                </el-pagination>
+            </el-row>
+        </el-col>
+
+
+
+
+
+
+
+
+    </el-row>
+
+
+</div>
+
+<script src="js/vue.js"></script>
+<script src="element-ui/lib/index.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+<link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+
+<script>
+    // import th from "./element-ui/src/locale/lang/th";
+    new Vue({
+        el:"#app",
+        mounted(){
+            this.selectByConditionAndPage(1);
+            //使selectByCondition函数可以重用
+            //响应response的数据时只能用switch
+            this.selectByConditionData[1]=this.student;
+            this.selectByConditionData[2]=this.teacher;
+            this.selectByConditionData[3]=this.cls;
+            this.selectByConditionData[4]=this.course;
+            this.selectByConditionData[5]=this.score;
+            //获取url中的get参数
+            let url = location.search; //获取url中"?"符后的字串
+            let theRequest = {};
+            let strs;
+            if (url.indexOf("?") != -1) {
+                let str = url.substr(1);
+                strs = str.split("&");
+                for (let i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = (strs[i].split("=")[1]);
+                }
+            }
+            this.welcomeTitle = "早上好，" + theRequest["username"];
+        },
+        data:{
+            welcomeTitle:"",
+            student:{
+                sno:"",
+                name:"",
+                sex:"",
+                age:"",
+                grade:"",
+                classId:"",
+            },
+            studentData:[],
+            tableShow:[false,false,false,false,false,false,false],
+            studentAddDialogShow:false,
+            studentSubmitType:"",
+            teacherData:[],
+            teacher:{
+                grade:"",
+                teacherId:"",
+                name:"",
+                sex:"",
+                age:"",
+                courseName:"",
+            },
+            teacherInputDialogShow:false,
+            teacherSubmitType:"",
+            classData:[],
+            cls:{
+                grade:"",
+                classId:"",
+                classroomId:"",
+                headmasterId:"",
+                headmasterName:"",
+                studentNum:"",
+            },
+            classInputDialogShow:false,
+            classSubmitType:"",
+            courseData:[],
+            course:{
+                grade:"",
+                courseName:"",
+                courseId:"",
+                teacherId:"",
+                teacherName:"",
+            },
+            courseInputDialogShow:false,
+            courseSubmitType:"",
+            scoreData:[],
+            score:{
+                sno:"",
+                studentName:"",
+                courseId:"",
+                courseName:"",
+                teacherId:"",
+                teacherName:"",
+                score:"",
+            },
+            scoreInputDialogShow:false,
+            scoreSubmitType:"",
+            selectByConditionData:[null,null,null,null,null,null],
+            selectByConditionType:[null,"student","teacher","class","course","score"],
+            scoreOrdered:"",
+            currentPage:1,
+            totalCount:0,
+            pageSize:5,
+            selectByConditionAndPageData:null,
+            currentMenu:1,
+        },
+        methods:{
+            //让表格显示出来，并且隐藏其他表格
+            //学生表的下标是1
+            showTable(index){
+                for (let i = 0; i < this.tableShow.length; i++) {
+                    this.tableShow[i] = false;
+                }
+                this.tableShow[index] = true;
+            },
+            studentInfo(){
+                //学生表的下标是1
+                this.showTable(1);
+                let _this = this;
+                axios({
+                    method:"get",
+                    // url:"http://localhost:8080/stu-info-manage-sys/student/selectAll",
+                    url:"stu-info-manage-sys/student/selectAll",
+                }).then(function (response) {
+                    _this.studentData = response.data;
+                    //由于很多表单绑定了同一个student对象，所以输入后值会改变，因此清空一下
+                    _this.studentClear();
+                })
+            },
+            // studentInsert(){
+            //     let _this = this;
+            //     axios({
+            //         method:"post",
+            //         url:"http://localhost:8080/stu-info-manage-sys/student/insert",
+            //         data:this.student
+            //     }).then(function (response) {
+            //         if ("success" == response.data) {
+            //             _this.studentAddDialogShow = false;
+            //             _this.studentInfo();
+            //             _this.$message({
+            //                 message:"添加成功",
+            //                 type: 'success'
+            //             });
+            //         }
+            //         else {
+            //             _this.studentInfo();
+            //             _this.$message({
+            //                 message:"添加失败",
+            //                 type: 'warning'
+            //             });
+            //         }
+            //     })
+            // },
+            //修改代码，使学生添加的表单可以重用
+            studentSubmit(type) {
+                let _this = this;
+                let msgMap = {"insert": ["添加成功", "添加失败"], "updateBySno": ["修改成功", "修改失败"]};
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/student/"+type,
+                    url:"/stu-info-manage-sys/student/"+type,
+                    data:this.student
+                }).then(function (response) {
+                    if ("success" == response.data) {
+                        _this.studentAddDialogShow = false;
+                        //要把选择全部换成有分页的，不然页面卡死
+                        _this.menuSelect(1);
+                        _this.$message({
+                            message:msgMap[type][0],
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        _this.$message({
+                            message:msgMap[type][1],
+                            type: 'warning'
+                        });
+                    }
+                });
+            },
+            studentInsert() {
+                this.studentClear();
+                this.studentAddDialogShow = true;
+                this.studentSubmitType = "insert";
+            },
+            studentUpdateBySno(index){
+                this.studentAddDialogShow = true;
+                this.studentSubmitType = "updateBySno";
+                this.student.sno = this.studentData[index].sno;
+                this.student.grade = this.studentData[index].grade;
+                this.student.classId = this.studentData[index].classId;
+                this.student.name = this.studentData[index].name;
+                this.student.sex = this.studentData[index].sex;
+                this.student.age = this.studentData[index].age;
+            },
+            studentClear() {
+                this.student.sno = "";
+                this.student.grade = "";
+                this.student.classId = "";
+                this.student.name = "";
+                this.student.sex = "";
+                this.student.age = "";
+            },
+            studentDeleteBySno(index) {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let deleteData = "sno=" + this.studentData[index].sno;
+                    let _this = this;
+                    axios({
+                        method:"post",
+                        // url:"http://localhost:8080/stu-info-manage-sys/student/deleteBySno",
+                        url:"/stu-info-manage-sys/student/deleteBySno",
+                        data:deleteData,
+                    }).then(function (response) {
+                        if (response.data == "success") {
+                            _this.menuSelect(1);
+                            _this.$message({
+                                message:"删除成功",
+                                type: 'success'
+                            });
+                        }
+                        else {
+                            _this.$message({
+                                message:"删除失败",
+                                type: 'warning'
+                            });
+                        }
+                    });
+                }).catch(() => {
+
+                });
+            },
+            teacherSelectAll() {
+                this.showTable(2);
+                let _this = this;
+                axios({
+                    method:"get",
+                    // url:"http://localhost:8080/stu-info-manage-sys/teacher/selectAll",
+                    url:"/stu-info-manage-sys/teacher/selectAll",
+                }).then(function (response) {
+                    _this.teacherData = response.data;
+                    _this.teacherClear();
+                })
+            },
+            teacherInsert() {
+                this.teacherClear();
+                this.teacherInputDialogShow = true;
+                this.teacherSubmitType = "insert";
+            },
+            teacherClear() {
+                this.teacher.teacherId = "";
+                this.teacher.name = "";
+                this.teacher.sex = "";
+                this.teacher.age = "";
+                this.teacher.grade = "";
+                this.teacher.courseName = "";
+            },
+            teacherSubmit() {
+                let _this = this;
+                let msgMap = {"insert": ["添加成功", "添加失败"], "updateByTeacherId": ["修改成功", "修改失败"]};
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/teacher/"+_this.teacherSubmitType,
+                    url:"/stu-info-manage-sys/teacher/"+_this.teacherSubmitType,
+                    data:this.teacher
+                }).then(function (response) {
+                    if ("success" == response.data) {
+                        _this.teacherInputDialogShow = false;
+                        _this.menuSelect(2);
+                        _this.$message({
+                            message:msgMap[_this.teacherSubmitType][0],
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        _this.$message({
+                            message:msgMap[_this.teacherSubmitType][1],
+                            type: 'warning'
+                        });
+                    }
+                });
+            },
+            teacherUpdateByTeacherId(index) {
+                this.teacherInputDialogShow = true;
+                this.teacherSubmitType = "updateByTeacherId";
+                this.teacher.teacherId = this.teacherData[index].teacherId;
+                this.teacher.name = this.teacherData[index].name;
+                this.teacher.sex = this.teacherData[index].sex;
+                this.teacher.age = this.teacherData[index].age;
+                this.teacher.courseName = this.teacherData[index].courseName;
+                this.teacher.grade = this.teacherData[index].grade;
+            },
+            teacherDeleteByTeacherId(index) {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let deleteData = "teacherId=" + this.teacherData[index].teacherId;
+                    let _this = this;
+                    axios({
+                        method:"post",
+                        // url:"http://localhost:8080/stu-info-manage-sys/teacher/deleteByTeacherId",
+                        url:"/stu-info-manage-sys/teacher/deleteByTeacherId",
+                        data:deleteData,
+                    }).then(function (response) {
+                        if (response.data == "success") {
+                            _this.menuSelect(2);
+                            _this.$message({
+                                message:"删除成功",
+                                type: 'success'
+                            });
+                        }
+                        else {
+                            _this.$message({
+                                message:"删除失败",
+                                type: 'warning'
+                            });
+                        }
+                    });
+                }).catch(() => {
+
+                });
+            },
+            classSelectAll() {
+                this.showTable(3);
+                let _this = this;
+                axios({
+                    method:"get",
+                    // url:"http://localhost:8080/stu-info-manage-sys/class/selectAll",
+                    url:"/stu-info-manage-sys/class/selectAll",
+                }).then(function (response) {
+                    _this.classData = response.data;
+                    _this.classClear();
+                })
+            },
+            classInsert() {
+                this.classClear();
+                this.classInputDialogShow = true;
+                this.classSubmitType = "insert";
+            },
+            classClear() {
+                this.cls.grade = "";
+                this.cls.classId = "";
+                this.cls.classroomId = "";
+                this.cls.headmasterId = "";
+                this.cls.headmasterName = "";
+                this.cls.studentNum = "";
+            },
+            classSubmit() {
+                let _this = this;
+                let msgMap = {"insert": ["添加成功", "添加失败"], "updateByClassId": ["修改成功", "修改失败"]};
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/class/"+_this.classSubmitType,
+                    url:"/stu-info-manage-sys/class/"+_this.classSubmitType,
+                    data:this.cls
+                }).then(function (response) {
+                    if ("success" == response.data) {
+                        _this.classInputDialogShow = false;
+                        _this.menuSelect(3);
+                        _this.$message({
+                            message:msgMap[_this.classSubmitType][0],
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        _this.$message({
+                            message:msgMap[_this.classSubmitType][1],
+                            type: 'warning'
+                        });
+                    }
+                });
+            },
+            classUpdateByClassId(index) {
+                this.classInputDialogShow = true;
+                this.classSubmitType = "updateByClassId";
+                this.cls.grade = this.classData[index].grade;
+                this.cls.classId = this.classData[index].classId;
+                this.cls.classroomId = this.classData[index].classroomId;
+                this.cls.headmasterId = this.classData[index].headmasterId;
+            },
+            classDeleteByClassId(index) {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let deleteData = "classId=" + this.classData[index].classId;
+                    let _this = this;
+                    axios({
+                        method:"post",
+                        // url:"http://localhost:8080/stu-info-manage-sys/class/deleteByClassId",
+                        url:"/stu-info-manage-sys/class/deleteByClassId",
+                        data:deleteData,
+                    }).then(function (response) {
+                        if (response.data == "success") {
+                            _this.menuSelect(3);
+                            _this.$message({
+                                message:"删除成功",
+                                type: 'success'
+                            });
+                        }
+                        else {
+                            _this.$message({
+                                message:"删除失败",
+                                type: 'warning'
+                            });
+                        }
+                    });
+                }).catch(() => {
+
+                });
+            },
+            courseSelectAll() {
+                this.showTable(4);
+                let _this = this;
+                axios({
+                    method:"get",
+                    // url:"http://localhost:8080/stu-info-manage-sys/course/selectAll",
+                    url:"/stu-info-manage-sys/course/selectAll",
+                }).then(function (response) {
+                    _this.courseData = response.data;
+                    _this.courseClear();
+                })
+            },
+            courseInsert() {
+                this.courseClear();
+                this.courseInputDialogShow = true;
+                this.courseSubmitType = "insert";
+            },
+            courseClear() {
+                this.course.grade = "";
+                this.course.courseId = "";
+                this.course.courseName = "";
+                this.course.teacherId = "";
+                this.course.teacherName = "";
+            },
+            courseSubmit() {
+                let _this = this;
+                let msgMap = {"insert": ["添加成功", "添加失败"], "updateByCourseId": ["修改成功", "修改失败"]};
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/course/"+_this.courseSubmitType,
+                    url:"/stu-info-manage-sys/course/"+_this.courseSubmitType,
+                    data:this.course
+                }).then(function (response) {
+                    if ("success" == response.data) {
+                        _this.courseInputDialogShow = false;
+                        _this.menuSelect(4);
+                        _this.$message({
+                            message:msgMap[_this.courseSubmitType][0],
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        _this.$message({
+                            message:msgMap[_this.courseSubmitType][1],
+                            type: 'warning'
+                        });
+                    }
+                });
+            },
+            courseUpdateByCourseId(index) {
+                this.courseInputDialogShow = true;
+                this.courseSubmitType = "updateByCourseId";
+                this.course.grade = this.courseData[index].grade;
+                this.course.courseId = this.courseData[index].courseId;
+                this.course.courseName = this.courseData[index].courseName;
+            },
+            courseDeleteByCourseId(index) {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let deleteData = "courseId=" + this.courseData[index].courseId;
+                    let _this = this;
+                    axios({
+                        method:"post",
+                        // url:"http://localhost:8080/stu-info-manage-sys/course/deleteByCourseId",
+                        url:"/stu-info-manage-sys/course/deleteByCourseId",
+                        data:deleteData,
+                    }).then(function (response) {
+                        if (response.data == "success") {
+                            _this.menuSelect(4);
+                            _this.$message({
+                                message:"删除成功",
+                                type: 'success'
+                            });
+                        }
+                        else {
+                            _this.$message({
+                                message:"删除失败",
+                                type: 'warning'
+                            });
+                        }
+                    });
+                }).catch(() => {
+
+                });
+            },
+            scoreSelectAll() {
+                this.showTable(5);
+                let _this = this;
+                axios({
+                    method:"get",
+                    // url:"http://localhost:8080/stu-info-manage-sys/score/selectAll",
+                    url:"/stu-info-manage-sys/score/selectAll",
+                }).then(function (response) {
+                    _this.scoreData = response.data;
+                    _this.scoreClear();
+                })
+            },
+            scoreInsert() {
+                this.scoreClear();
+                this.scoreInputDialogShow = true;
+                this.scoreSubmitType = "insert";
+            },
+            scoreClear() {
+                this.score.sno = "";
+                this.score.courseId = "";
+                this.score.courseName = "";
+                this.score.teacherId = "";
+                this.score.score = "";
+            },
+            scoreSubmit() {
+                let _this = this;
+                let msgMap = {"insert": ["添加成功", "添加失败"], "updateBySnoAndCourseId": ["修改成功", "修改失败"]};
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/score/"+_this.scoreSubmitType,
+                    url:"/stu-info-manage-sys/score/"+_this.scoreSubmitType,
+                    data:this.score
+                }).then(function (response) {
+                    if ("success" == response.data) {
+                        _this.scoreInputDialogShow = false;
+                        _this.menuSelect(5);
+                        _this.$message({
+                            message:msgMap[_this.scoreSubmitType][0],
+                            type: 'success'
+                        });
+                    }
+                    else {
+                        _this.$message({
+                            message:msgMap[_this.scoreSubmitType][1],
+                            type: 'warning'
+                        });
+                    }
+                });
+            },
+            scoreUpdateBySnoAndCourseId(index) {
+                this.scoreInputDialogShow = true;
+                this.scoreSubmitType = "updateBySnoAndCourseId";
+                this.score.sno = this.scoreData[index].sno;
+                this.score.courseId = this.scoreData[index].courseId;
+                this.score.courseName = this.scoreData[index].courseName;
+                this.score.teacherId = this.scoreData[index].teacherId;
+                this.score.score = this.scoreData[index].score;
+            },
+            scoreDeleteBySnoAndCourseId(index) {
+                this.$confirm("是否删除？", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let deleteData = "courseId="+this.scoreData[index].courseId+"&sno="+this.scoreData[index].sno;
+                    let _this = this;
+                    axios({
+                        method:"post",
+                        // url:"http://localhost:8080/stu-info-manage-sys/score/deleteBySnoAndCourseId",
+                        url:"/stu-info-manage-sys/score/deleteBySnoAndCourseId",
+                        data:deleteData,
+                    }).then(function (response) {
+                        if (response.data == "success") {
+                            _this.menuSelect(5);
+                            _this.$message({
+                                message:"删除成功",
+                                type: 'success'
+                            });
+                        }
+                        else {
+                            _this.menuSelect(5);
+                            _this.$message({
+                                message:"删除失败",
+                                type: 'warning'
+                            });
+                        }
+                    });
+                }).catch(() => {
+
+                });
+            },
+            //由于临时增加了学生排序的功能，所以在url后加上参数
+            selectByConditionAndPage(index) {
+                let _this = this;
+                axios({
+                    method:"post",
+                    // url:"http://localhost:8080/stu-info-manage-sys/"+this.selectByConditionType[index]+"/selectByConditionAndPage?scoreOrdered="+this.scoreOrdered+"&currentPage="+this.currentPage+"&pageSize="+this.pageSize,
+                    url:"/stu-info-manage-sys/"+this.selectByConditionType[index]+"/selectByConditionAndPage?scoreOrdered="+this.scoreOrdered+"&currentPage="+this.currentPage+"&pageSize="+this.pageSize,
+                    // data:this.selectByConditionData[index]
+                    data:this.getSelectByConditionAndPageData(index)
+                }).then(function (response) {
+                    _this.showTable(index);
+                    _this.currentMenu = index;
+                    switch (index) {
+                        case 1:_this.studentData=response.data.rows;break;
+                        case 2:_this.teacherData=response.data.rows;break;
+                        case 3:_this.classData=response.data.rows;break;
+                        case 4:_this.courseData=response.data.rows;break;
+                        case 5:_this.scoreData=response.data.rows;break;
+                    }
+                    _this.totalCount = response.data.totalCount;
+                })
+            },
+            currentPageChange(currentPageValue) {
+                this.currentPage = currentPageValue;
+                this.selectByConditionAndPage(this.currentMenu);
+            },
+            pageSizeChange(currentPageSize) {
+                this.pageSize = currentPageSize;
+                this.selectByConditionAndPage(this.currentMenu);
+            },
+            getSelectByConditionAndPageData(index) {
+                switch (index) {
+                    case 1:return this.student;
+                    case 2:return this.teacher;
+                    case 3:return this.cls;
+                    case 4:return this.course;
+                    case 5:return this.score;
+                    default:return null;
+                }
+            },
+            //为了在点击菜单前清空一下，加入函数
+            menuSelect(index) {
+                this.clearSelect(index);
+                this.selectByConditionAndPage(index);
+            },
+            clearSelect(index) {
+                switch (index) {
+                    case 1:this.studentClear();break;
+                    case 2:this.teacherClear();break;
+                    case 3:this.classClear();break;
+                    case 4:this.courseClear();break;
+                    case 5:this.scoreClear();break;
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
